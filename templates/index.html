@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <title>Visit Tracker</title>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #ffffff;
+            --bg2: #f5f5f5;
+            --bg3: #ebebeb;
+            --text: #1a1a1a;
+            --text2: #555;
+            --text3: #999;
+            --border: #e0e0e0;
+            --border2: #ccc;
+            --green: #16a34a;
+            --green-bg: #dcfce7;
+            --green-text: #15803d;
+            --amber: #d97706;
+            --amber-bg: #fef3c7;
+            --amber-text: #92400e;
+            --red: #dc2626;
+            --red-bg: #fee2e2;
+            --red-text: #991b1b;
+            --blue: #2563eb;
+            --blue-bg: #dbeafe;
+            --blue-text: #1e40af;
+            --purple: #7c3aed;
+            --purple-bg: #ede9fe;
+            --purple-text: #5b21b6;
+            --radius: 10px;
+            --radius-sm: 6px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg2);
+            color: var(--text);
+            font-size: 15px;
+            padding-bottom: 80px;
+        }
+
+        .header {
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            padding: 14px 16px 10px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .header p {
+            font-size: 12px;
+            color: var(--text3);
+            margin-top: 2px;
+        }
+
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            padding: 12px 12px 0;
+        }
+
+        .stat-card {
+            background: var(--bg);
+            border-radius: var(--radius-sm);
+            padding: 10px 8px;
+            text-align: center;
+            border: 1px solid var(--border);
+        }
+
+        .stat-num {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: var(--text3);
+            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .nav {
+            display: flex;
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            margin-top: 12px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 11px 4px;
+            font-size: 13px;
+            border: none;
+            background: transparent;
+            color: var(--text2);
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            font-weight: 500;
+        }
+
+        .nav-btn.active {
+            color: var(--blue);
+            border-bottom-color: var(--blue);
+        }
+
+        .view {
+            display: none;
+            padding: 12px;
+        }
+
+        .view.active {
+            display: block;
+        }
+
+        /* FORM */
+        .form-section {
+            background: var(--bg);
+            border-radius: var(--radius);
+            padding: 14px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .section-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text3);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 10px;
+        }
+
+        .field {
+            margin-bottom: 10px;
+        }
+
+        .field label {
+            font-size: 13px;
+            color: var(--text2);
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .field input,
+        .field select,
+        .field textarea {
+            width: 100%;
+            padding: 10px 12px;
+            font-size: 15px;
+            border: 1px solid var(--border2);
+            border-radius: var(--radius-sm);
+            background: var(--bg);
+            color: var(--text);
+            appearance: none;
+            -webkit-appearance: none;
+            outline: none;
+        }
+
+        .field input:focus,
+        .field select:focus,
+        .field textarea:focus {
+            border-color: var(--blue);
+        }
+
+        .field textarea {
+            height: 80px;
+            resize: none;
+            font-family: inherit;
+        }
+
+        .field-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .rating-row {
+            display: flex;
+            gap: 6px;
+        }
+
+        .rating-btn {
+            flex: 1;
+            padding: 9px 4px;
+            font-size: 13px;
+            border: 1px solid var(--border2);
+            border-radius: var(--radius-sm);
+            background: transparent;
+            color: var(--text2);
+            cursor: pointer;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .rating-btn.active-1 {
+            background: var(--red-bg);
+            color: var(--red-text);
+            border-color: var(--red);
+        }
+
+        .rating-btn.active-2 {
+            background: var(--amber-bg);
+            color: var(--amber-text);
+            border-color: var(--amber);
+        }
+
+        .rating-btn.active-3 {
+            background: var(--green-bg);
+            color: var(--green-text);
+            border-color: var(--green);
+        }
+
+        .interest-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .int-btn {
+            padding: 9px 6px;
+            font-size: 13px;
+            border: 1px solid var(--border2);
+            border-radius: var(--radius-sm);
+            background: transparent;
+            color: var(--text2);
+            cursor: pointer;
+            text-align: center;
+        }
+
+        .int-btn.active {
+            background: var(--blue-bg);
+            color: var(--blue-text);
+            border-color: var(--blue);
+        }
+
+        .int-btn.active-paying {
+            background: var(--purple-bg);
+            color: var(--purple-text);
+            border-color: var(--purple);
+        }
+
+        .save-btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            background: var(--blue);
+            color: white;
+            border: none;
+            border-radius: var(--radius);
+            cursor: pointer;
+            margin-top: 4px;
+        }
+
+        .save-btn:active {
+            opacity: 0.85;
+        }
+
+        .save-btn:disabled {
+            opacity: 0.5;
+        }
+
+        /* VISITS LIST */
+        .filter-row {
+            display: flex;
+            gap: 6px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+            margin-bottom: 10px;
+        }
+
+        .filter-row::-webkit-scrollbar {
+            display: none;
+        }
+
+        .filter-chip {
+            padding: 6px 14px;
+            font-size: 13px;
+            border: 1px solid var(--border2);
+            border-radius: 20px;
+            background: var(--bg);
+            color: var(--text2);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .filter-chip.active {
+            background: var(--blue);
+            color: white;
+            border-color: var(--blue);
+        }
+
+        .visit-card {
+            background: var(--bg);
+            border-radius: var(--radius);
+            padding: 14px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .vc-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .vc-name {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .vc-sub {
+            font-size: 12px;
+            color: var(--text3);
+            margin-top: 2px;
+        }
+
+        .badge-row {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .badge-hot {
+            background: var(--green-bg);
+            color: var(--green-text);
+        }
+
+        .badge-warm {
+            background: var(--amber-bg);
+            color: var(--amber-text);
+        }
+
+        .badge-low {
+            background: var(--bg3);
+            color: var(--text2);
+        }
+
+        .badge-paying {
+            background: var(--purple-bg);
+            color: var(--purple-text);
+        }
+
+        .badge-yes {
+            background: var(--blue-bg);
+            color: var(--blue-text);
+        }
+
+        .badge-maybe {
+            background: var(--amber-bg);
+            color: var(--amber-text);
+        }
+
+        .badge-no {
+            background: var(--bg3);
+            color: var(--text3);
+        }
+
+        .vc-pain {
+            font-size: 13px;
+            color: var(--text2);
+            font-style: italic;
+            border-left: 3px solid var(--border2);
+            padding-left: 10px;
+            margin: 8px 0;
+            line-height: 1.5;
+        }
+
+        .vc-detail {
+            font-size: 12px;
+            color: var(--text3);
+            margin: 3px 0;
+        }
+
+        .vc-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+            border-top: 1px solid var(--border);
+            padding-top: 10px;
+        }
+
+        .vc-btn {
+            flex: 1;
+            padding: 8px;
+            font-size: 12px;
+            border: 1px solid var(--border2);
+            border-radius: var(--radius-sm);
+            background: transparent;
+            color: var(--text2);
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .vc-btn.done {
+            background: var(--green-bg);
+            color: var(--green-text);
+            border-color: var(--green);
+        }
+
+        .vc-btn.del {
+            color: var(--red-text);
+            border-color: var(--red-bg);
+        }
+
+        .vc-btn:active {
+            opacity: 0.7;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text3);
+        }
+
+        .empty-state p {
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        /* PATTERNS */
+        .pattern-card {
+            background: var(--bg);
+            border-radius: var(--radius);
+            padding: 14px;
+            margin-bottom: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .pattern-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .bar-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 9px;
+        }
+
+        .bar-label {
+            font-size: 12px;
+            color: var(--text2);
+            width: 120px;
+            flex-shrink: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 8px;
+            background: var(--bg3);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: var(--blue);
+            border-radius: 4px;
+            transition: width 0.4s;
+        }
+
+        .bar-fill.green {
+            background: var(--green);
+        }
+
+        .bar-fill.amber {
+            background: var(--amber);
+        }
+
+        .bar-count {
+            font-size: 12px;
+            color: var(--text3);
+            min-width: 20px;
+            text-align: right;
+        }
+
+        .no-data {
+            font-size: 13px;
+            color: var(--text3);
+            text-align: center;
+            padding: 16px 0;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 90px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1a1a1a;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            z-index: 100;
+            opacity: 0;
+            transition: opacity 0.2s;
+            pointer-events: none;
+            white-space: nowrap;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg: #1c1c1e;
+                --bg2: #000000;
+                --bg3: #2c2c2e;
+                --text: #f2f2f7;
+                --text2: #aeaeb2;
+                --text3: #636366;
+                --border: #2c2c2e;
+                --border2: #3a3a3c;
+                --green-bg: #0d2e14;
+                --green-text: #4ade80;
+                --amber-bg: #2e1e06;
+                --amber-text: #fbbf24;
+                --red-bg: #2e0d0d;
+                --red-text: #f87171;
+                --blue-bg: #0d1e3a;
+                --blue-text: #60a5fa;
+                --purple-bg: #1e0d3a;
+                --purple-text: #a78bfa;
+            }
+
+            .save-btn {
+                background: #2563eb;
+            }
+
+            .filter-chip.active {
+                background: #2563eb;
+            }
+
+            .toast {
+                background: #f2f2f7;
+                color: #1a1a1a;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="header">
+        <h1>Visit Tracker</h1>
+        <p>SMB customer discovery — Hyderabad</p>
+    </div>
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="stat-num" id="s-total">0</div>
+            <div class="stat-label">Visits</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num" id="s-hot">0</div>
+            <div class="stat-label">Hot</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num" id="s-followup">0</div>
+            <div class="stat-label">Follow-up</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-num" id="s-pending">0</div>
+            <div class="stat-label">Pending</div>
+        </div>
+    </div>
+
+    <div class="nav">
+        <button class="nav-btn active" onclick="showView('log', this)">Log Visit</button>
+        <button class="nav-btn" onclick="showView('visits', this)">Visits</button>
+        <button class="nav-btn" onclick="showView('patterns', this)">Patterns</button>
+    </div>
+
+    <!-- LOG VIEW -->
+    <div id="view-log" class="view active">
+
+        <div class="form-section">
+            <div class="section-title">Business details</div>
+            <div class="field-row">
+                <div class="field"><label>Business name *</label><input type="text" id="f-name"
+                        placeholder="e.g. Ravi Hardware"></div>
+                <div class="field"><label>Owner name</label><input type="text" id="f-owner"
+                        placeholder="e.g. Ravi Sharma"></div>
+            </div>
+            <div class="field-row">
+                <div class="field"><label>Area</label><input type="text" id="f-area" placeholder="e.g. Begum Bazaar">
+                </div>
+                <div class="field">
+                    <label>Business type</label>
+                    <select id="f-type">
+                        <option value="">Select...</option>
+                        <option>Pharma / medical retail</option>
+                        <option>Hardware / building materials</option>
+                        <option>Garment / textile trader</option>
+                        <option>Auto spare parts</option>
+                        <option>Restaurant / catering</option>
+                        <option>Manufacturer / fabricator</option>
+                        <option>General trader / distributor</option>
+                        <option>Other</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-title">Pain & interest</div>
+            <div class="field">
+                <label>Their exact words (pain quote)</label>
+                <textarea id="f-pain" placeholder="Write what they said, in their words..."></textarea>
+            </div>
+            <div class="field">
+                <label>Pain intensity</label>
+                <div class="rating-row">
+                    <button class="rating-btn" id="pi-1" onclick="setPain(1)">Low</button>
+                    <button class="rating-btn" id="pi-2" onclick="setPain(2)">Medium</button>
+                    <button class="rating-btn" id="pi-3" onclick="setPain(3)">High</button>
+                </div>
+            </div>
+            <div class="field">
+                <label>Interest in the product</label>
+                <div class="interest-row">
+                    <button class="int-btn" id="int-no" onclick="setInterest('no')">Not interested</button>
+                    <button class="int-btn" id="int-maybe" onclick="setInterest('maybe')">Maybe</button>
+                    <button class="int-btn" id="int-yes" onclick="setInterest('yes')">Wants update</button>
+                    <button class="int-btn" id="int-paying" onclick="setInterest('paying')">Would pay</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="section-title">Contact and tools</div>
+            <div class="field-row">
+                <div class="field"><label>WhatsApp number</label><input type="tel" id="f-phone"
+                        placeholder="98765 43210"></div>
+                <div class="field"><label>Current tool</label><input type="text" id="f-tool"
+                        placeholder="Tally, Excel, nothing..."></div>
+            </div>
+            <div class="field"><label>Notes</label><textarea id="f-notes"
+                    placeholder="Anything else worth remembering..."></textarea></div>
+        </div>
+
+        <button class="save-btn" onclick="saveVisit()" id="save-btn">Save visit</button>
+    </div>
+
+    <!-- VISITS VIEW -->
+    <div id="view-visits" class="view">
+        <div class="filter-row">
+            <button class="filter-chip active" onclick="setFilter('all', this)">All</button>
+            <button class="filter-chip" onclick="setFilter('hot', this)">Hot leads</button>
+            <button class="filter-chip" onclick="setFilter('followup', this)">Follow-up</button>
+            <button class="filter-chip" onclick="setFilter('pending', this)">Pending</button>
+        </div>
+        <div id="visits-list"></div>
+    </div>
+
+    <!-- PATTERNS VIEW -->
+    <div id="view-patterns" class="view">
+        <div class="pattern-card">
+            <div class="pattern-title">Interest breakdown</div>
+            <div id="p-interest"></div>
+        </div>
+        <div class="pattern-card">
+            <div class="pattern-title">Pain level distribution</div>
+            <div id="p-pain"></div>
+        </div>
+        <div class="pattern-card">
+            <div class="pattern-title">Business types visited</div>
+            <div id="p-types"></div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        let painLevel = 0;
+        let interestVal = '';
+        let activeFilter = 'all';
+
+        function toast(msg) {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 2000);
+        }
+
+        function showView(name, btn) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('view-' + name).classList.add('active');
+            btn.classList.add('active');
+            if (name === 'visits') loadVisits();
+            if (name === 'patterns') loadPatterns();
+        }
+
+        function setPain(n) {
+            painLevel = n;
+            [1, 2, 3].forEach(i => {
+                document.getElementById('pi-' + i).className = 'rating-btn' + (i === n ? ' active-' + i : '');
+            });
+        }
+
+        function setInterest(v) {
+            interestVal = v;
+            ['no', 'maybe', 'yes', 'paying'].forEach(k => {
+                const btn = document.getElementById('int-' + k);
+                btn.className = 'int-btn' + (k === v ? (v === 'paying' ? ' active-paying' : ' active') : '');
+            });
+        }
+
+        async function saveVisit() {
+            const name = document.getElementById('f-name').value.trim();
+            if (!name) { toast('Enter a business name'); return; }
+            const btn = document.getElementById('save-btn');
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+            try {
+                const res = await fetch('/api/visits', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        business_name: name,
+                        owner_name: document.getElementById('f-owner').value.trim(),
+                        area: document.getElementById('f-area').value.trim(),
+                        business_type: document.getElementById('f-type').value,
+                        pain_quote: document.getElementById('f-pain').value.trim(),
+                        pain_level: painLevel,
+                        interest: interestVal,
+                        whatsapp: document.getElementById('f-phone').value.trim(),
+                        current_tool: document.getElementById('f-tool').value.trim(),
+                        notes: document.getElementById('f-notes').value.trim()
+                    })
+                });
+                if (res.ok) {
+                    resetForm();
+                    toast('Visit saved');
+                    loadStats();
+                }
+            } catch (e) { toast('Error saving'); }
+            btn.disabled = false;
+            btn.textContent = 'Save visit';
+        }
+
+        function resetForm() {
+            ['f-name', 'f-owner', 'f-area', 'f-pain', 'f-phone', 'f-tool', 'f-notes'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('f-type').value = '';
+            painLevel = 0; interestVal = '';
+            [1, 2, 3].forEach(i => document.getElementById('pi-' + i).className = 'rating-btn');
+            ['no', 'maybe', 'yes', 'paying'].forEach(k => document.getElementById('int-' + k).className = 'int-btn');
+        }
+
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/stats');
+                const d = await res.json();
+                document.getElementById('s-total').textContent = d.total;
+                document.getElementById('s-hot').textContent = d.hot;
+                document.getElementById('s-followup').textContent = d.followup;
+                document.getElementById('s-pending').textContent = d.pending;
+            } catch (e) { }
+        }
+
+        function setFilter(f, btn) {
+            activeFilter = f;
+            document.querySelectorAll('.filter-chip').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            loadVisits();
+        }
+
+        function painBadge(v) {
+            if (!v.pain_level) return '';
+            const map = { 1: ['badge-low', 'Low pain'], 2: ['badge-warm', 'Medium pain'], 3: ['badge-hot', 'High pain'] };
+            const [cls, label] = map[v.pain_level];
+            return `<span class="badge ${cls}">${label}</span>`;
+        }
+
+        function interestBadge(v) {
+            if (!v.interest) return '';
+            const map = {
+                paying: ['badge-paying', 'Would pay'],
+                yes: ['badge-yes', 'Wants update'],
+                maybe: ['badge-maybe', 'Maybe'],
+                no: ['badge-no', 'Not interested']
+            };
+            const [cls, label] = map[v.interest] || [];
+            return cls ? `<span class="badge ${cls}">${label}</span>` : '';
+        }
+
+        async function loadVisits() {
+            const el = document.getElementById('visits-list');
+            el.innerHTML = '<div class="empty-state"><p>Loading...</p></div>';
+            try {
+                const res = await fetch('/api/visits?filter=' + activeFilter);
+                const visits = await res.json();
+                if (!visits.length) {
+                    el.innerHTML = '<div class="empty-state"><p>No visits here yet.</p></div>';
+                    return;
+                }
+                el.innerHTML = visits.map(v => `
+      <div class="visit-card" id="vc-${v.id}">
+        <div class="vc-header">
+          <div>
+            <div class="vc-name">${v.business_name}</div>
+            <div class="vc-sub">${[v.owner_name, v.business_type, v.area].filter(Boolean).join(' · ')}</div>
+          </div>
+          <div class="badge-row">${painBadge(v)}${interestBadge(v)}</div>
+        </div>
+        ${v.pain_quote ? `<div class="vc-pain">"${v.pain_quote}"</div>` : ''}
+        ${v.current_tool ? `<div class="vc-detail">Uses: ${v.current_tool}</div>` : ''}
+        ${v.whatsapp ? `<div class="vc-detail">WhatsApp: ${v.whatsapp}</div>` : ''}
+        ${v.notes ? `<div class="vc-detail" style="margin-top:6px">${v.notes}</div>` : ''}
+        <div class="vc-detail" style="margin-top:6px;color:var(--text3)">${v.created_at}</div>
+        <div class="vc-actions">
+          <button class="vc-btn ${v.followed_up ? 'done' : ''}" onclick="toggleFollowup('${v.id}', this)">
+            ${v.followed_up ? 'Followed up' : 'Mark followed up'}
+          </button>
+          ${v.whatsapp ? `<button class="vc-btn" onclick="window.open('https://wa.me/91${v.whatsapp.replace(/\D/g, '')}')">WhatsApp</button>` : ''}
+          <button class="vc-btn del" onclick="deleteVisit('${v.id}')">Delete</button>
+        </div>
+      </div>
+    `).join('');
+            } catch (e) { el.innerHTML = '<div class="empty-state"><p>Could not load visits.</p></div>'; }
+        }
+
+        async function toggleFollowup(id, btn) {
+            try {
+                const res = await fetch('/api/visits/' + id + '/followup', { method: 'PATCH' });
+                const d = await res.json();
+                btn.className = 'vc-btn' + (d.followed_up ? ' done' : '');
+                btn.textContent = d.followed_up ? 'Followed up' : 'Mark followed up';
+                loadStats();
+            } catch (e) { }
+        }
+
+        async function deleteVisit(id) {
+            if (!confirm('Delete this visit?')) return;
+            await fetch('/api/visits/' + id, { method: 'DELETE' });
+            document.getElementById('vc-' + id)?.remove();
+            loadStats();
+            toast('Deleted');
+        }
+
+        function barHtml(label, count, max, colorClass) {
+            const pct = max > 0 ? Math.round(count / max * 100) : 0;
+            return `<div class="bar-row">
+    <div class="bar-label">${label}</div>
+    <div class="bar-track"><div class="bar-fill ${colorClass}" style="width:${pct}%"></div></div>
+    <div class="bar-count">${count}</div>
+  </div>`;
+        }
+
+        async function loadPatterns() {
+            try {
+                const res = await fetch('/api/stats');
+                const d = await res.json();
+
+                const intEl = document.getElementById('p-interest');
+                const intMap = { paying: 'Would pay', yes: 'Wants update', maybe: 'Maybe', no: 'Not interested' };
+                const intColor = { paying: 'green', yes: '', maybe: 'amber', no: '' };
+                if (d.by_interest.length) {
+                    const max = d.by_interest[0].cnt;
+                    intEl.innerHTML = d.by_interest.map(r => barHtml(intMap[r.interest] || r.interest, r.cnt, max, intColor[r.interest] || '')).join('');
+                } else { intEl.innerHTML = '<div class="no-data">No data yet — log some visits.</div>'; }
+
+                const painEl = document.getElementById('p-pain');
+                const painMap = { 3: 'High pain', 2: 'Medium pain', 1: 'Low pain' };
+                const painColor = { 3: 'green', 2: 'amber', 1: '' };
+                if (d.by_pain.length) {
+                    const max = d.by_pain[0].cnt;
+                    painEl.innerHTML = d.by_pain.map(r => barHtml(painMap[r.pain_level] || r.pain_level, r.cnt, max, painColor[r.pain_level] || '')).join('');
+                } else { painEl.innerHTML = '<div class="no-data">No data yet.</div>'; }
+
+                const typeEl = document.getElementById('p-types');
+                if (d.by_type.length) {
+                    const max = d.by_type[0].cnt;
+                    typeEl.innerHTML = d.by_type.map(r => barHtml(r.business_type, r.cnt, max, '')).join('');
+                } else { typeEl.innerHTML = '<div class="no-data">No data yet.</div>'; }
+
+            } catch (e) { }
+        }
+
+        loadStats();
+    </script>
+</body>
+
+</html>
